@@ -21,7 +21,7 @@ function CartItemCard({data}) {
         <img
           src={data.image}
           alt={data.name}
-          className='w-20 h-20 object-cover rounded-xl border border-gray-100'
+          className='w-20 h-20 object-cover  rounded-xl border border-gray-100'
         />
         <div>
           <h1 className='font-semibold text-gray-900 text-base leading-snug'>{data.name}</h1>

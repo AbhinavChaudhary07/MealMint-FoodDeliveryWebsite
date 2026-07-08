@@ -37,24 +37,111 @@ function UserDashboard() {
       <Nav />
 
       {/* ===== Hero banner ===== */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#2a1210] via-[#3d1712] to-[#ff4d2d] rounded-b-[36px] sm:rounded-b-[48px] shadow-xl">
-        {/* decorative blobs */}
-        <div className="pointer-events-none absolute -top-16 -left-16 w-64 h-64 rounded-full bg-[#ff7a4d] opacity-30 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 -right-10 w-72 h-72 rounded-full bg-[#ffb200] opacity-20 blur-3xl" />
-        <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] rounded-full border border-white/10" />
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#2a1210] via-[#3d1712] to-[#ff4d2d] rounded-b-[30px] shadow-xl">
+  {/* Background Effects */}
+  <div className="absolute inset-0">
+    <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-[#ff7a4d]/20 blur-3xl" />
+    <div className="absolute -bottom-24 right-0 w-80 h-80 rounded-full bg-[#ffb200]/15 blur-3xl" />
+    <div className="absolute top-8 right-14 w-24 h-24 rounded-full border border-white/10" />
+    <div className="absolute bottom-10 left-16 w-16 h-16 rounded-full border border-white/10" />
+  </div>
 
-        <div className="relative w-full max-w-6xl mx-auto px-6 pt-14 pb-10 flex flex-col items-center text-center gap-3">
-          <span className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-[#ffd8c2] text-xs font-semibold tracking-[0.25em] uppercase px-4 py-1.5 rounded-full border border-white/10">
-            🍽 Delivering to {city || "your city"}
-          </span>
-          <h1 className="text-white text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight drop-shadow-sm">
-            Ready for Your <span className="text-[#ffb200]">Next Meal?</span>
+  <div className="relative max-w-6xl mx-auto px-6 py-10 md:py-12">
+    <div className="grid lg:grid-cols-2 gap-8 items-center">
+
+      {/* Left Content */}
+      <div className="space-y-5">
+
+        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-orange-100 text-xs font-semibold tracking-widest uppercase">
+          📍 Delivering in {city || "Your City"}
+        </span>
+
+        <div>
+          <h1 className="text-4xl md:text-5xl font-black leading-tight text-white">
+            Craving
+            <span className="block text-[#ffb200]">
+              Something Delicious?
+            </span>
           </h1>
-          <p className="text-white/70 text-sm sm:text-base max-w-md">
-            Fresh picks, fast delivery, and the best kitchens near you — all in one place.
+
+          <p className="mt-4 text-white/70 text-base max-w-lg leading-7">
+            Order from your favourite restaurants, discover new dishes,
+            and enjoy lightning fast delivery right to your doorstep.
           </p>
         </div>
+
+        {/* Stats */}
+        <div className="flex flex-wrap gap-8 pt-2">
+
+          <div>
+            <h2 className="text-2xl font-bold text-white">
+              {shopInMyCity?.length || 0}+
+            </h2>
+            <p className="text-white/60 text-sm">
+              Restaurants
+            </p>
+          </div>
+
+          <div>
+            <h2 className="text-2xl font-bold text-white">
+              {itemsInMyCity?.length || 0}+
+            </h2>
+            <p className="text-white/60 text-sm">
+              Food Items
+            </p>
+          </div>
+
+          <div>
+            <h2 className="text-2xl font-bold text-white">
+              30 min
+            </h2>
+            <p className="text-white/60 text-sm">
+              Avg Delivery
+            </p>
+          </div>
+
+        </div>
+
       </div>
+
+      {/* Right Illustration */}
+      <div className="relative flex justify-center">
+
+        <div className="absolute w-[340px] h-[340px] rounded-full bg-orange-400/20 blur-3xl"></div>
+
+        <div className="relative bg-white/10 backdrop-blur-xl border border-white/10 rounded-[30px] p-5 rotate-2 shadow-2xl">
+
+          <img
+            src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=900"
+            alt="Food"
+            className="w-[280px] md:w-[320px] h-[280px] md:h-[320px] object-cover rounded-[22px]"
+          />
+
+          <div className="absolute -bottom-5 -left-5 bg-white rounded-xl shadow-lg px-4 py-3">
+            <p className="text-xs text-gray-500">
+              Today's Special
+            </p>
+            <h3 className="font-bold text-gray-800 text-sm">
+              Cheese Burst Pizza 🍕
+            </h3>
+          </div>
+
+          <div className="absolute -top-5 -right-5 bg-white rounded-xl shadow-lg px-4 py-3">
+            <p className="text-xs text-gray-500">
+              Delivery
+            </p>
+            <h3 className="font-bold text-green-600 text-sm">
+              ⚡ 25–30 mins
+            </h3>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
 
       {/* ===== Categories ===== */}
       <div className="w-full max-w-6xl mx-auto flex flex-col gap-4 px-[10px] pt-10">

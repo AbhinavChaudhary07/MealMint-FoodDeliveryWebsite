@@ -13,7 +13,11 @@ function MyOrders() {
 const dispatch=useDispatch()
   useEffect(()=>{
 socket?.on('newOrder',(data)=>{
-if(data.shopOrders?.owner._id==userData._id){
+const ownerHasOrder = data.shopOrders?.some((shopOrder) => {
+const ownerId = shopOrder.owner?._id || shopOrder.owner
+return ownerId == userData._id
+})
+if(ownerHasOrder){
 dispatch(setMyOrders([data,...myOrders]))
 }
 })
@@ -28,7 +32,7 @@ return ()=>{
   socket?.off('newOrder')
   socket?.off('update-status')
 }
-  },[socket])
+  },[socket,userData,myOrders,dispatch])
 
 
 

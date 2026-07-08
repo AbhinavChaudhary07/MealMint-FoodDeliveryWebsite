@@ -48,11 +48,14 @@ function OwnerNav({ onAddFood }) {
 
 
             {/* Pending Orders button */}
-            <div className='relative flex items-center gap-2 px-3 sm:px-4 py-1.5 bg-[#fff0ed] text-[#ff4d2d] border border-[#ff4d2d] rounded-full cursor-pointer hover:bg-[#ffe0d9] transition-colors'>
+            <button
+              onClick={() => navigate('/my-orders')}
+              className='relative flex items-center gap-2 px-3 sm:px-4 py-1.5 bg-[#fff0ed] text-[#ff4d2d] border border-[#ff4d2d] rounded-full cursor-pointer hover:bg-[#ffe0d9] transition-colors'
+            >
               <TbReceiptDollar className='text-[16px] shrink-0' />
               <span className='hidden sm:inline text-[13px] font-semibold'>Pending Orders</span>
               <span className='absolute -right-2 -top-2 text-xs font-bold text-white bg-[#ff4d2d] rounded-full px-[6px] py-[1px]'>0</span>
-            </div>
+            </button>
 
             {/* Account avatar */}
             <div className='relative'>
@@ -98,15 +101,21 @@ function OwnerNav({ onAddFood }) {
           <FiPlusSquare className='text-[22px]' />
           <span className='text-[10px] font-medium'>Add Food</span>
         </button>
-        <button className='flex flex-col items-center gap-0.5 text-gray-500'>
+        <button
+          className='flex flex-col items-center gap-0.5 text-gray-500'
+          onClick={() => navigate('/my-orders')}
+        >
           <FiPackage className='text-[22px]' />
           <span className='text-[10px] font-medium'>My Orders</span>
         </button>
-        <div className='relative flex flex-col items-center gap-0.5 text-gray-500'>
+        <button
+          className='relative flex flex-col items-center gap-0.5 text-gray-500'
+          onClick={() => navigate('/my-orders')}
+        >
           <TbReceiptDollar className='text-[22px]' />
           <span className='text-[10px] font-medium'>Pending</span>
           <span className='absolute -right-1 -top-1 text-[9px] font-bold text-white bg-[#ff4d2d] rounded-full px-[5px] py-[1px]'>0</span>
-        </div>
+        </button>
         <button className='flex flex-col items-center gap-0.5 text-gray-500'>
           <FiUser className='text-[22px]' />
           <span className='text-[10px] font-medium'>Account</span>

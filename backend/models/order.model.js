@@ -6,6 +6,7 @@ item:{
         ref:"Item"
 },
 name:String,
+image:String,
 price:Number,
 quantity:Number
 
@@ -21,7 +22,17 @@ type:mongoose.Schema.Types.ObjectId,
         ref:"User"
 },
 subtotal:Number,
-shopOrderItems:[shopOrderItemSchema]
+shopOrderItems:[shopOrderItemSchema],
+status:{
+    type:String,
+    enum:["pending","preparing","out of delivery","delivered"],
+    default:"pending"
+},
+assignedDeliveryBoy:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:"User",
+    default:null
+}
 
 
 },{timestamps:true})
