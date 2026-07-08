@@ -1,25 +1,23 @@
-import mongoose from "mongoose";
-
-const shopSchema=new mongoose.Schema({
+import mongoose from "mongoose"
+const shopSchema= new mongoose.Schema({
     name:{
         type:String,
         required:true
     },
     image:{
         type:String,
-        required:true
+        required:false
     },
     owner:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"User",
-        required:true
+        ref:"User"
     },
     city:{
-         type:String,
+        type:String,
         required:true
     },
     state:{
-         type:String,
+        type:String,
         required:true
     },
     address:{
@@ -30,8 +28,9 @@ const shopSchema=new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"Item"
     }]
-
+    
 },{timestamps:true})
 
-const Shop=mongoose.model("Shop",shopSchema)
+const Shop = mongoose.model("Shop", shopSchema);
+
 export default Shop

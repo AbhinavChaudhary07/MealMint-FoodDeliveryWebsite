@@ -1,11 +1,21 @@
+import dns from "dns"
 import mongoose from "mongoose"
 
-const connectDb=async () => {
+const connectDb = async()=>{
     try {
-        await mongoose.connect(process.env.MONGODB_URL)
+        if (!process.env.MONGODB_URL) {
+            throw new Error("MONGODB_URL is missing in .env")
+        }
+
+        dns.setServers(["8.8.8.8", "1.1.1.1"])
+
+        await mongoose.connect(process.env.MONGODB_URL, {
+            serverSelectionTimeoutMS: 10000,
+        })
         console.log("db connected")
     } catch (error) {
-        console.log("db error")
+        console.error("MongoDB connection failed:", error.message)
+        process.exit(1)
     }
 }
 

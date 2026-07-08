@@ -1,141 +1,261 @@
-import React from 'react'
-import { IoIosArrowRoundBack } from "react-icons/io";
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { FaUtensils } from "react-icons/fa";
-import { useState } from 'react';
-import { useRef } from 'react';
-import axios from 'axios';
-import { serverUrl } from '../App';
-import { setMyShopData } from '../redux/ownerSlice';
-import { ClipLoader } from 'react-spinners';
+import React, { useState } from "react";
+import OwnerNav from "../components/OwnerNav.jsx";
+import { useDispatch } from "react-redux";
+import { FiCamera, FiChevronRight, FiChevronLeft } from "react-icons/fi";
+import { MdOutlineStorefront } from "react-icons/md";
+import { TbCurrencyRupee } from "react-icons/tb";
+import { MdFastfood } from "react-icons/md";
+import axios from "axios";
+import { serverUrl } from "../App";
+import { useNavigate } from "react-router-dom";
+import { setMyShopData } from "../redux/ownerSlice.js";
+
+const categories = [
+  "Snacks",
+  "Main Course ",
+  "Desserts",
+  "Pizza",
+  "Burgers",
+  "Sandwiches",
+  "South Indian",
+  "North Indian",
+  "Chinese",
+  "Fast Food",
+  "Others",
+];
+
 function AddItem() {
-    const navigate = useNavigate()
-    const { myShopData } = useSelector(state => state.owner)
-    const [loading,setLoading]=useState(false)
-    const [name, setName] = useState("")
-    const [price, setPrice] = useState(0)
-    const [frontendImage, setFrontendImage] = useState(null)
-    const [backendImage, setBackendImage] = useState(null)
-    const [category, setCategory] = useState("")
-    const [foodType, setFoodType] = useState("veg")
-    const categories = ["Snacks",
-        "Main Course",
-        "Desserts",
-        "Pizza",
-        "Burgers",
-        "Sandwiches",
-        "South Indian",
-        "North Indian",
-        "Chinese",
-        "Fast Food",
-        "Others"]
-    const dispatch = useDispatch()
-    const handleImage = (e) => {
-        const file = e.target.files[0]
-        setBackendImage(file)
-        setFrontendImage(URL.createObjectURL(file))
-    }
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    category: "",
+    foodType: "veg",
+    price: "",
+    image: null,
+    preview: null,
+  });
 
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-        setLoading(true)
-        try {
-            const formData = new FormData()
-            formData.append("name",name)
-            formData.append("category",category)
-            formData.append("foodType", foodType)
-            formData.append("price", price)
-            if (backendImage) {
-                formData.append("image", backendImage)
-            }
-            const result = await axios.post(`${serverUrl}/api/item/add-item`, formData, { withCredentials: true })
-            dispatch(setMyShopData(result.data))
-           setLoading(false)
-           navigate("/")
-        } catch (error) {
-            console.log(error)
-            setLoading(false)
-        }
+  const handleImage = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setForm((prev) => ({
+      ...prev,
+      image: file,
+      preview: URL.createObjectURL(file),
+    }));
+  };
+
+  const handleChange = (e) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("name", form.name);
+      formData.append("category", form.category);
+      formData.append("foodType", form.foodType);
+      formData.append("price", form.price);
+      if (form.image) formData.append("image", form.image);
+      const result = await axios.post(
+        `${serverUrl}/api/item/add-item`,
+        formData,
+        { withCredentials: true },
+      );
+      dispatch(setMyShopData(result.data));
+      navigate("/");
+      console.log(result.data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
     }
-    return (
-        <div className='flex justify-center flex-col items-center p-6 bg-gradient-to-br from-orange-50 relative to-white min-h-screen'>
-            <div className='absolute top-[20px] left-[20px] z-[10] mb-[10px]' onClick={() => navigate("/")}>
-                <IoIosArrowRoundBack size={35} className='text-[#ff4d2d]' />
+  };
+
+  return (
+    <div className="min-h-screen bg-[#fff9f6] relative overflow-hidden">
+      <OwnerNav onAddFood={() => {}} />
+
+      {/* ambient background accents */}
+      <div className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-[#ffdccb] opacity-50 blur-3xl" />
+      <div className="pointer-events-none absolute top-1/3 -left-28 w-72 h-72 rounded-full bg-[#ffe8de] opacity-60 blur-3xl" />
+
+      <div className="relative flex justify-center items-center min-h-[calc(100vh-64px)] px-4 sm:px-6 py-10">
+        <div className="w-full max-w-lg">
+          {/* Header */}
+          <div className="flex flex-col items-center mb-6 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#ff4d2d] to-[#ff8452] shadow-lg shadow-orange-200 flex items-center justify-center mb-4">
+              <MdFastfood className="text-white text-[28px]" />
+            </div>
+            <h2 className="text-[22px] sm:text-[27px] font-extrabold text-gray-900 tracking-tight">
+              Add Food Item
+            </h2>
+            <p className="text-[13px] text-gray-400 mt-1">
+              Add a new item to your menu
+            </p>
+          </div>
+
+          {/* Card */}
+          <div className="bg-white rounded-3xl shadow-xl shadow-orange-100/60 border border-[#fde4d8] p-5 sm:p-7 flex flex-col gap-5">
+            {/* Image upload */}
+            <label className="cursor-pointer group">
+              <div className="relative w-full h-[150px] sm:h-[170px] rounded-2xl overflow-hidden bg-gradient-to-br from-[#fff3ee] to-[#ffe4d8] border-2 border-dashed border-[#ffc7b0] flex flex-col items-center justify-center gap-2 group-hover:border-[#ff4d2d] transition-colors duration-200">
+                {form.preview ? (
+                  <img
+                    src={form.preview}
+                    alt="item"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <>
+                    <div className="w-11 h-11 rounded-full bg-white shadow-sm flex items-center justify-center">
+                      <FiCamera className="text-[#ff4d2d] text-[20px]" />
+                    </div>
+                    <span className="text-[13px] text-[#ff4d2d] font-semibold">
+                      Upload item photo
+                    </span>
+                    <span className="text-[11px] text-gray-400">
+                      JPG, PNG up to 5MB
+                    </span>
+                  </>
+                )}
+                {form.preview && (
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="flex flex-col items-center gap-1.5">
+                      <FiCamera className="text-white text-[24px]" />
+                      <span className="text-white text-[12px] font-medium">
+                        Change photo
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImage}
+              />
+            </label>
+
+            {/* Item Name */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                Item Name
+              </label>
+              <div className="flex items-center gap-2.5 border border-gray-200 rounded-xl px-3.5 py-3 focus-within:border-[#ff4d2d] focus-within:ring-4 focus-within:ring-orange-50 transition-all bg-gray-50/70">
+                <MdOutlineStorefront className="text-[#ff4d2d] text-[17px] shrink-0" />
+                <input
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  placeholder="e.g. Chicken Burger"
+                  className="flex-1 text-[14px] bg-transparent outline-none placeholder-gray-300 text-gray-800"
+                />
+              </div>
             </div>
 
-            <div className='max-w-lg w-full bg-white shadow-xl rounded-2xl p-8 border border-orange-100'>
-                <div className='flex flex-col items-center mb-6'>
-                    <div className='bg-orange-100 p-4 rounded-full mb-4'>
-                        <FaUtensils className='text-[#ff4d2d] w-16 h-16' />
-                    </div>
-                    <div className="text-3xl font-extrabold text-gray-900">
-                        Add Food
-                    </div>
+            {/* Category & Price */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col gap-1.5 flex-1">
+                <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                  Category
+                </label>
+                <select
+                  name="category"
+                  value={form.category}
+                  onChange={handleChange}
+                  className="border border-gray-200 rounded-xl px-3.5 py-3 text-[14px] bg-gray-50/70 outline-none focus:border-[#ff4d2d] focus:ring-4 focus:ring-orange-50 transition-all text-gray-700"
+                >
+                  <option value="">Select category</option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-1.5 flex-1">
+                <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                  Price
+                </label>
+                <div className="flex items-center gap-2.5 border border-gray-200 rounded-xl px-3.5 py-3 focus-within:border-[#ff4d2d] focus-within:ring-4 focus-within:ring-orange-50 transition-all bg-gray-50/70">
+                  <TbCurrencyRupee className="text-[#ff4d2d] text-[17px] shrink-0" />
+                  <input
+                    name="price"
+                    value={form.price}
+                    onChange={handleChange}
+                    placeholder="e.g. 199"
+                    type="number"
+                    className="flex-1 text-[14px] bg-transparent outline-none placeholder-gray-300 text-gray-800"
+                  />
                 </div>
-                <form className='space-y-5' onSubmit={handleSubmit}>
-                    <div>
-                        <label className='block text-sm font-medium text-gray-700 mb-1'>Name</label>
-                        <input type="text" placeholder='Enter Food Name' className='w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500'
-                            onChange={(e) => setName(e.target.value)}
-                            value={name}
-                        />
-                    </div>
-                    <div>
-                        <label className='block text-sm font-medium text-gray-700 mb-1'>Food Image</label>
-                        <input type="file" accept='image/*' className='w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500' onChange={handleImage} />
-                        {frontendImage && <div className='mt-4'>
-                            <img src={frontendImage} alt="" className='w-full h-48 object-cover rounded-lg border' />
-                        </div>}
-
-                    </div>
-                    <div>
-                        <label className='block text-sm font-medium text-gray-700 mb-1'>Price</label>
-                        <input type="number" placeholder='0' className='w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500'
-                            onChange={(e) => setPrice(e.target.value)}
-                            value={price}
-                        />
-                    </div>
-                    <div>
-                        <label className='block text-sm font-medium text-gray-700 mb-1'>Select Category</label>
-                        <select className='w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500'
-                            onChange={(e) => setCategory(e.target.value)}
-                            value={category}
-
-                        >
-                            <option value="">select Category</option>
-                            {categories.map((cate, index) => (
-                                <option value={cate} key={index}>{cate}</option>
-                            ))}
-
-                        </select>
-                    </div>
-                    <div>
-                        <label className='block text-sm font-medium text-gray-700 mb-1'>Select Food Type</label>
-                        <select className='w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500'
-                            onChange={(e) => setFoodType(e.target.value)}
-                            value={foodType}
-
-                        >
-                            <option value="veg" >veg</option>
- <option value="non veg" >non veg</option>
-
-
-
-
-                        </select>
-                    </div>
-
-                    <button className='w-full bg-[#ff4d2d] text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-orange-600 hover:shadow-lg transition-all duration-200 cursor-pointer' disabled={loading}>
-                      {loading?<ClipLoader size={20} color='white' />:"Save"}
-                    </button>
-                </form>
+              </div>
             </div>
 
+            {/* Food Type */}
+            <div className="flex flex-col gap-2">
+              <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                Food Type
+              </label>
+              <div className="flex gap-3">
+                <button
+                  onClick={() =>
+                    setForm((prev) => ({ ...prev, foodType: "veg" }))
+                  }
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border text-[13px] font-semibold transition-all ${form.foodType === "veg" ? "bg-green-50 border-green-500 text-green-600 ring-4 ring-green-50 shadow-sm" : "border-gray-200 text-gray-400 bg-gray-50/70 hover:border-gray-300"}`}
+                >
+                  <span className="w-3.5 h-3.5 rounded-full border-2 border-green-600 flex items-center justify-center">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-600"></span>
+                  </span>
+                  Veg
+                </button>
+                <button
+                  onClick={() =>
+                    setForm((prev) => ({ ...prev, foodType: "nonveg" }))
+                  }
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border text-[13px] font-semibold transition-all ${form.foodType === "nonveg" ? "bg-red-50 border-red-500 text-red-600 ring-4 ring-red-50 shadow-sm" : "border-gray-200 text-gray-400 bg-gray-50/70 hover:border-gray-300"}`}
+                >
+                  <span className="w-3.5 h-3.5 rounded-full border-2 border-red-600 flex items-center justify-center">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-600"></span>
+                  </span>
+                  Non-Veg
+                </button>
+              </div>
+            </div>
 
+            {/* Buttons */}
+            <div className="flex gap-3 mt-1">
+              <button
+                onClick={() => navigate("/owner-dashboard")}
+                className="flex items-center justify-center gap-1.5 h-[48px] px-4 border border-gray-200 text-gray-600 text-[14px] font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-colors"
+              >
+                <FiChevronLeft className="text-[16px]" />
+                Back
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="flex-1 flex items-center justify-center gap-1.5 h-[48px] bg-gradient-to-r from-[#ff4d2d] to-[#ff6b3d] hover:from-[#e63d1e] hover:to-[#ff5a2a] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-xl shadow-lg shadow-orange-200 transition-all hover:shadow-xl hover:shadow-orange-300 active:scale-[0.98] group"
+              >
+                {loading ? "Adding..." : "Add Item"}
+                {!loading && (
+                  <FiChevronRight className="text-[16px] transition-transform group-hover:translate-x-0.5" />
+                )}
+              </button>
+            </div>
+          </div>
 
+          <p className="text-center text-[12px] text-gray-400 mt-5">
+            Item will appear on your menu immediately
+          </p>
         </div>
-    )
+      </div>
+    </div>
+  );
 }
 
-export default AddItem
+export default AddItem;

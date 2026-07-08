@@ -1,188 +1,112 @@
-import React from 'react'
-import Nav from './NaV.JSX'
+import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import axios from 'axios'
-import { serverUrl } from '../App'
-import { useEffect } from 'react'
-import { useState } from 'react'
-import DeliveryBoyTracking from './DeliveryBoyTracking'
-import { ClipLoader } from 'react-spinners'
+import Nav from './Nav'
+import { FiMapPin, FiNavigation, FiPackage, FiPhone, FiUser } from 'react-icons/fi'
 
 function DeliveryBoy() {
-  const {userData,socket}=useSelector(state=>state.user)
-  const [currentOrder,setCurrentOrder]=useState()
-  const [showOtpBox,setShowOtpBox]=useState(false)
-  const [availableAssignments,setAvailableAssignments]=useState(null)
-  const [otp,setOtp]=useState("")
-const [deliveryBoyLocation,setDeliveryBoyLocation]=useState(null)
-const [loading,setLoading]=useState(false)
-const [message,setMessage]=useState("")
-  useEffect(()=>{
-if(!socket || userData.role!=="deliveryBoy") return
-let watchId
-if(navigator.geolocation){
-watchId=navigator.geolocation.watchPosition((position)=>{
-    const latitude=position.coords.latitude
-    const longitude=position.coords.longitude
-    setDeliveryBoyLocation({lat:latitude,lon:longitude})
-    socket.emit('updateLocation',{
-      latitude,
-      longitude,
-      userId:userData._id
-    })
-  }),
-  (error)=>{
-    console.log(error)
-  },
-  {
-    enableHighAccuracy:true
-  }
-}
+  const { userData } = useSelector(state => state.user)
+  const [locationStatus, setLocationStatus] = useState("Checking location...")
+  const [isOnline, setIsOnline] = useState(true)
 
-return ()=>{
-  if(watchId)navigator.geolocation.clearWatch(watchId)
-}
-
-  },[socket,userData])
-
-
-
-
-  const getAssignments=async () => {
-    try {
-      const result=await axios.get(`${serverUrl}/api/order/get-assignments`,{withCredentials:true})
-      
-      setAvailableAssignments(result.data)
-    } catch (error) {
-      console.log(error)
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setLocationStatus("Location is not supported in this browser")
+      return
     }
-  }
 
-  const getCurrentOrder=async () => {
-     try {
-      const result=await axios.get(`${serverUrl}/api/order/get-current-order`,{withCredentials:true})
-    setCurrentOrder(result.data)
-    } catch (error) {
-      console.log(error)
-    }
-  }
+    const watchId = navigator.geolocation.watchPosition(
+      () => setLocationStatus("Location sharing is active"),
+      () => setLocationStatus("Allow location permission to receive nearby delivery updates"),
+      { enableHighAccuracy: true }
+    )
 
+    return () => navigator.geolocation.clearWatch(watchId)
+  }, [])
 
-  const acceptOrder=async (assignmentId) => {
-    try {
-      const result=await axios.get(`${serverUrl}/api/order/accept-order/${assignmentId}`,{withCredentials:true})
-    console.log(result.data)
-    await getCurrentOrder()
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
-  useEffect(()=>{
-    socket.on('newAssignment',(data)=>{
-      setAvailableAssignments(prev=>([...prev,data]))
-    })
-    return ()=>{
-      socket.off('newAssignment')
-    }
-  },[socket])
-  
-  const sendOtp=async () => {
-    setLoading(true)
-    try {
-      const result=await axios.post(`${serverUrl}/api/order/send-delivery-otp`,{
-        orderId:currentOrder._id,shopOrderId:currentOrder.shopOrder._id
-      },{withCredentials:true})
-      setLoading(false)
-       setShowOtpBox(true)
-    console.log(result.data)
-    } catch (error) {
-      console.log(error)
-      setLoading(false)
-    }
-  }
-   const verifyOtp=async () => {
-    setMessage("")
-    try {
-      const result=await axios.post(`${serverUrl}/api/order/verify-delivery-otp`,{
-        orderId:currentOrder._id,shopOrderId:currentOrder.shopOrder._id,otp
-      },{withCredentials:true})
-    console.log(result.data)
-    setMessage(result.data.message)
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
-
-
- 
-
-  useEffect(()=>{
-getAssignments()
-getCurrentOrder()
-  },[userData])
   return (
-    <div className='w-screen min-h-screen flex flex-col gap-5 items-center bg-[#fff9f6] overflow-y-auto'>
-      <Nav/>
-      <div className='w-full max-w-[800px] flex flex-col gap-5 items-center'>
-    <div className='bg-white rounded-2xl shadow-md p-5 flex flex-col justify-start items-center w-[90%] border border-orange-100 text-center gap-2'>
-<h1 className='text-xl font-bold text-[#ff4d2d]'>Welcome, {userData.fullName}</h1>
-<p className='text-[#ff4d2d] '><span className='font-semibold'>Latitude:</span> {deliveryBoyLocation?.lat}, <span className='font-semibold'>Longitude:</span> {deliveryBoyLocation?.lon}</p>
-    </div>
-{!currentOrder && <div className='bg-white rounded-2xl p-5 shadow-md w-[90%] border border-orange-100'>
-<h1 className='text-lg font-bold mb-4 flex items-center gap-2'>Available Orders</h1>
+    <div className='min-h-screen bg-[#fff9f6] pb-20'>
+      <Nav />
 
-<div className='space-y-4'>
-{availableAssignments?.length>0
-?
-(
-availableAssignments.map((a,index)=>(
-  <div className='border rounded-lg p-4 flex justify-between items-center' key={index}>
-   <div>
-    <p className='text-sm font-semibold'>{a?.shopName}</p>
-    <p className='text-sm text-gray-500'><span className='font-semibold'>Delivery Address:</span> {a?.deliveryAddress.text}</p>
-<p className='text-xs text-gray-400'>{a.items.length} items | {a.subtotal}</p>
-   </div>
-   <button className='bg-orange-500 text-white px-4 py-1 rounded-lg text-sm hover:bg-orange-600' onClick={()=>acceptOrder(a.assignmentId)}>Accept</button>
+      <main className='w-full max-w-5xl mx-auto px-4 pt-6 flex flex-col gap-6'>
+        <section className='bg-white border border-orange-100 rounded-2xl p-5 shadow-sm'>
+          <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
+            <div>
+              <p className='text-sm font-semibold text-[#ff4d2d]'>Delivery Dashboard</p>
+              <h1 className='text-2xl font-bold text-gray-900 mt-1'>
+                Welcome, {userData?.fullName || "Delivery Partner"}
+              </h1>
+              <p className='text-sm text-gray-500 mt-2'>
+                Keep your status online and location enabled so restaurants can assign orders to you.
+              </p>
+            </div>
 
-  </div>
-))
-):<p className='text-gray-400 text-sm'>No Available Orders</p>}
-</div>
-</div>}
+            <button
+              className={`px-5 py-2.5 rounded-full text-sm font-semibold text-white transition ${isOnline ? "bg-green-600 hover:bg-green-700" : "bg-gray-500 hover:bg-gray-600"}`}
+              onClick={() => setIsOnline(prev => !prev)}
+            >
+              {isOnline ? "Online" : "Offline"}
+            </button>
+          </div>
+        </section>
 
-{currentOrder && <div className='bg-white rounded-2xl p-5 shadow-md w-[90%] border border-orange-100'>
-<h2 className='text-lg font-bold mb-3'>📦Current Order</h2>
-<div className='border rounded-lg p-4 mb-3'>
-  <p className='font-semibold text-sm'>{currentOrder?.shopOrder.shop.name}</p>
-  <p className='text-sm text-gray-500'>{currentOrder.deliveryAddress.text}</p>
- <p className='text-xs text-gray-400'>{currentOrder.shopOrder.shopOrderItems.length} items | {currentOrder.shopOrder.subtotal}</p>
-</div>
+        <section className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+          <div className='bg-white border border-orange-100 rounded-2xl p-4 shadow-sm'>
+            <div className='flex items-center gap-3 text-gray-800'>
+              <span className='w-10 h-10 rounded-full bg-orange-50 text-[#ff4d2d] flex items-center justify-center'>
+                <FiUser />
+              </span>
+              <div>
+                <p className='text-xs text-gray-500'>Partner</p>
+                <p className='font-semibold'>{userData?.fullName || "Not available"}</p>
+              </div>
+            </div>
+          </div>
 
- <DeliveryBoyTracking data={{ 
-  deliveryBoyLocation:deliveryBoyLocation || {
-        lat: userData.location.coordinates[1],
-        lon: userData.location.coordinates[0]
-      },
-      customerLocation: {
-        lat: currentOrder.deliveryAddress.latitude,
-        lon: currentOrder.deliveryAddress.longitude
-      }}} />
-{!showOtpBox ? <button className='mt-4 w-full bg-green-500 text-white font-semibold py-2 px-4 rounded-xl shadow-md hover:bg-green-600 active:scale-95 transition-all duration-200' onClick={sendOtp} disabled={loading}>
-{loading?<ClipLoader size={20} color='white'/> :"Mark As Delivered"}
- </button>:<div className='mt-4 p-4 border rounded-xl bg-gray-50'>
-<p className='text-sm font-semibold mb-2'>Enter Otp send to <span className='text-orange-500'>{currentOrder.user.fullName}</span></p>
-<input type="text" className='w-full border px-3 py-2 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-orange-400' placeholder='Enter OTP' onChange={(e)=>setOtp(e.target.value)} value={otp}/>
-{message && <p className='text-center text-green-400 text-2xl mb-4'>{message}</p>}
+          <div className='bg-white border border-orange-100 rounded-2xl p-4 shadow-sm'>
+            <div className='flex items-center gap-3 text-gray-800'>
+              <span className='w-10 h-10 rounded-full bg-orange-50 text-[#ff4d2d] flex items-center justify-center'>
+                <FiPhone />
+              </span>
+              <div>
+                <p className='text-xs text-gray-500'>Mobile</p>
+                <p className='font-semibold'>{userData?.mobile || "Not available"}</p>
+              </div>
+            </div>
+          </div>
 
-<button className="w-full bg-orange-500 text-white py-2 rounded-lg font-semibold hover:bg-orange-600 transition-all" onClick={verifyOtp}>Submit OTP</button>
-  </div>}
+          <div className='bg-white border border-orange-100 rounded-2xl p-4 shadow-sm'>
+            <div className='flex items-center gap-3 text-gray-800'>
+              <span className='w-10 h-10 rounded-full bg-orange-50 text-[#ff4d2d] flex items-center justify-center'>
+                <FiMapPin />
+              </span>
+              <div>
+                <p className='text-xs text-gray-500'>Location</p>
+                <p className='font-semibold'>{locationStatus}</p>
+              </div>
+            </div>
+          </div>
+        </section>
 
-  </div>}
+        <section className='bg-white border border-orange-100 rounded-2xl p-5 shadow-sm'>
+          <div className='flex items-center gap-3 mb-4'>
+            <span className='w-10 h-10 rounded-full bg-orange-50 text-[#ff4d2d] flex items-center justify-center'>
+              <FiPackage />
+            </span>
+            <div>
+              <h2 className='text-lg font-bold text-gray-900'>Assigned Orders</h2>
+              <p className='text-sm text-gray-500'>Delivery assignments will appear here when a restaurant sends one.</p>
+            </div>
+          </div>
 
-
-      </div>
+          <div className='border border-dashed border-orange-200 rounded-xl p-8 text-center bg-orange-50/40'>
+            <FiNavigation className='mx-auto text-[#ff4d2d] text-3xl mb-3' />
+            <p className='font-semibold text-gray-800'>No active delivery yet</p>
+            <p className='text-sm text-gray-500 mt-1'>
+              You are ready to receive delivery requests.
+            </p>
+          </div>
+        </section>
+      </main>
     </div>
   )
 }

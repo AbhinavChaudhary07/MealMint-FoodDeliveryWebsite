@@ -1,157 +1,195 @@
-import React, { useEffect, useRef, useState } from 'react'
-import Nav from './NaV.JSX'
-import { categories } from '../category'
-import CategoryCard from './CategoryCard'
-import { FaCircleChevronLeft } from "react-icons/fa6";
-import { FaCircleChevronRight } from "react-icons/fa6";
-import { useSelector } from 'react-redux';
-import FoodCard from './FoodCard';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { serverUrl } from '../App';
+import React, { useRef } from "react";
+import Nav from "./Nav";
+import { categories } from "../category";
+import CategoryCard from "./CategoryCard";
+import { useSelector } from "react-redux";
+import useGetShopByCity from "../hooks/useGetShopByCity";
+import FoodCard from "./FoodCard";
 
 function UserDashboard() {
-  const {currentCity,shopInMyCity,itemsInMyCity,searchItems}=useSelector(state=>state.user)
-  const cateScrollRef=useRef()
-  const shopScrollRef=useRef()
-  const navigate=useNavigate()
-  const [showLeftCateButton,setShowLeftCateButton]=useState(false)
-  const [showRightCateButton,setShowRightCateButton]=useState(false)
-   const [showLeftShopButton,setShowLeftShopButton]=useState(false)
-  const [showRightShopButton,setShowRightShopButton]=useState(false)
-  const [updatedItemsList,setUpdatedItemsList]=useState([])
+  useGetShopByCity();
+  const { city, shopInMyCity, itemsInMyCity } = useSelector((state) => state.user);
 
-const handleFilterByCategory=(category)=>{
-if(category=="All"){
-  setUpdatedItemsList(itemsInMyCity)
-}else{
-  const filteredList=itemsInMyCity?.filter(i=>i.category===category)
-  setUpdatedItemsList(filteredList)
-}
+  const catScrollRef = useRef(null);
+  const shopScrollRef = useRef(null);
 
-}
-
-useEffect(()=>{
-setUpdatedItemsList(itemsInMyCity)
-},[itemsInMyCity])
-
-
-  const updateButton=(ref,setLeftButton,setRightButton)=>{
-const element=ref.current
-if(element){
-setLeftButton(element.scrollLeft>0)
-setRightButton(element.scrollLeft+element.clientWidth<element.scrollWidth)
-
-}
-  }
-  const scrollHandler=(ref,direction)=>{
-    if(ref.current){
+  const scroll = (ref, direction) => {
+    if (ref.current) {
       ref.current.scrollBy({
-        left:direction=="left"?-200:200,
-        behavior:"smooth"
-      })
+        left: direction === "left" ? -300 : 300,
+        behavior: "smooth",
+      });
     }
-  }
+  };
 
-
-
-
-  useEffect(()=>{
-    if(cateScrollRef.current){
-      updateButton(cateScrollRef,setShowLeftCateButton,setShowRightCateButton)
-      updateButton(shopScrollRef,setShowLeftShopButton,setShowRightShopButton)
-      cateScrollRef.current.addEventListener('scroll',()=>{
-        updateButton(cateScrollRef,setShowLeftCateButton,setShowRightCateButton)
-      })
-      shopScrollRef.current.addEventListener('scroll',()=>{
-         updateButton(shopScrollRef,setShowLeftShopButton,setShowRightShopButton)
-      })
-     
+  // converts two-finger vertical trackpad scroll into horizontal scroll
+  const handleWheel = (ref, e) => {
+    if (ref.current) {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        e.preventDefault();
+        ref.current.scrollLeft += e.deltaY;
+      }
     }
-
-    return ()=>{cateScrollRef?.current?.removeEventListener("scroll",()=>{
-        updateButton(cateScrollRef,setShowLeftCateButton,setShowRightCateButton)
-      })
-         shopScrollRef?.current?.removeEventListener("scroll",()=>{
-        updateButton(shopScrollRef,setShowLeftShopButton,setShowRightShopButton)
-      })}
-
-  },[categories])
-
+  };
 
   return (
-    <div className='w-screen min-h-screen flex flex-col gap-5 items-center bg-[#fff9f6] overflow-y-auto'>
+    <div className="min-h-screen bg-[#fffaf7]">
       <Nav />
 
-      {searchItems && searchItems.length>0 && (
-        <div className='w-full max-w-6xl flex flex-col gap-5 items-start p-5 bg-white shadow-md rounded-2xl mt-4'>
-<h1 className='text-gray-900 text-2xl sm:text-3xl font-semibold border-b border-gray-200 pb-2'>
-  Search Results
-</h1>
-<div className='w-full h-auto flex flex-wrap gap-6 justify-center'>
-  {searchItems.map((item)=>(
-    <FoodCard data={item} key={item._id}/>
-  ))}
-</div>
+      {/* ===== Hero banner ===== */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#2a1210] via-[#3d1712] to-[#ff4d2d] rounded-b-[36px] sm:rounded-b-[48px] shadow-xl">
+        {/* decorative blobs */}
+        <div className="pointer-events-none absolute -top-16 -left-16 w-64 h-64 rounded-full bg-[#ff7a4d] opacity-30 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -right-10 w-72 h-72 rounded-full bg-[#ffb200] opacity-20 blur-3xl" />
+        <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] rounded-full border border-white/10" />
+
+        <div className="relative w-full max-w-6xl mx-auto px-6 pt-14 pb-10 flex flex-col items-center text-center gap-3">
+          <span className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-[#ffd8c2] text-xs font-semibold tracking-[0.25em] uppercase px-4 py-1.5 rounded-full border border-white/10">
+            🍽 Delivering to {city || "your city"}
+          </span>
+          <h1 className="text-white text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight drop-shadow-sm">
+            Ready for Your <span className="text-[#ffb200]">Next Meal?</span>
+          </h1>
+          <p className="text-white/70 text-sm sm:text-base max-w-md">
+            Fresh picks, fast delivery, and the best kitchens near you — all in one place.
+          </p>
         </div>
-      )}
+      </div>
 
-      <div className="w-full max-w-6xl flex flex-col gap-5 items-start p-[10px]">
+      {/* ===== Categories ===== */}
+      <div className="w-full max-w-6xl mx-auto flex flex-col gap-4 px-[10px] pt-10">
+        <div className="flex items-center gap-3 px-1">
+          <span className="w-1.5 h-6 rounded-full bg-[#ff4d2d]" />
+          <h2 className="text-gray-900 text-xl sm:text-2xl font-bold tracking-tight">
+            Explore Categories
+          </h2>
+        </div>
 
-        <h1 className='text-gray-800 text-2xl sm:text-3xl'>Inspiration for your first order</h1>
-        <div className='w-full relative'>
-          {showLeftCateButton &&  <button className='absolute left-0 top-1/2 -translate-y-1/2 bg-[#ff4d2d] text-white p-2 rounded-full shadow-lg hover:bg-[#e64528] z-10' onClick={()=>scrollHandler(cateScrollRef,"left")}><FaCircleChevronLeft />
-          </button>}
-         
+        <div className="w-screen relative left-1/2 -translate-x-1/2">
+          <div className="pointer-events-none absolute left-0 top-0 bottom-2 w-10 sm:w-20 bg-gradient-to-r from-[#fffaf7] to-transparent z-[5]" />
+          <div className="pointer-events-none absolute right-0 top-0 bottom-2 w-10 sm:w-20 bg-gradient-to-l from-[#fffaf7] to-transparent z-[5]" />
 
-          <div className='w-full flex overflow-x-auto gap-4 pb-2 ' ref={cateScrollRef}>
-            {categories.map((cate, index) => (
-              <CategoryCard name={cate.category} image={cate.image} key={index} onClick={()=>handleFilterByCategory(cate.category)}/>
+          <button
+            onClick={() => scroll(catScrollRef, "left")}
+            aria-label="Scroll categories left"
+            className="flex items-center justify-center absolute left-1 sm:left-3 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg shadow-orange-200/50 border border-orange-100 rounded-full w-8 h-8 sm:w-10 sm:h-10 text-gray-600 text-lg sm:text-xl font-bold transition hover:bg-[#ff4d2d] hover:text-white hover:scale-105 hover:border-transparent active:scale-95"
+          >
+            ‹
+          </button>
+
+          <div
+            ref={catScrollRef}
+            onWheel={(e) => handleWheel(catScrollRef, e)}
+            className="overflow-x-auto scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          >
+            <div className="flex gap-4 pb-3 px-6 w-max">
+              {categories.map((cate, index) => (
+                <div
+                  key={index}
+                  className="rounded-2xl transition-all duration-200 hover:-translate-y-1.5 hover:shadow-lg hover:shadow-orange-200/60"
+                >
+                  <CategoryCard name={cate.category} image={cate.image} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <button
+            onClick={() => scroll(catScrollRef, "right")}
+            aria-label="Scroll categories right"
+            className="flex items-center justify-center absolute right-1 sm:right-3 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg shadow-orange-200/50 border border-orange-100 rounded-full w-8 h-8 sm:w-10 sm:h-10 text-gray-600 text-lg sm:text-xl font-bold transition hover:bg-[#ff4d2d] hover:text-white hover:scale-105 hover:border-transparent active:scale-95"
+          >
+            ›
+          </button>
+        </div>
+      </div>
+
+      {/* ===== Best shops ===== */}
+      <div className="w-full max-w-6xl mx-auto flex flex-col gap-4 px-[10px] pt-12">
+        <div className="flex items-center gap-3 px-1">
+          <span className="w-1.5 h-6 rounded-full bg-[#ff4d2d]" />
+          <h2 className="text-gray-900 text-xl sm:text-2xl font-bold tracking-tight">
+            Best Shops In <span className="text-[#ff4d2d]">{city}</span>
+          </h2>
+        </div>
+
+        {shopInMyCity?.length === 0 ? (
+          <div className="w-full rounded-2xl border border-dashed border-orange-200 bg-orange-50/50 py-10 px-6 text-center">
+            <p className="text-gray-500 text-sm">
+              No shops found near {city} yet. Check back soon!
+            </p>
+          </div>
+        ) : (
+          <div className="w-screen relative left-1/2 -translate-x-1/2">
+            <div className="pointer-events-none absolute left-0 top-0 bottom-2 w-10 sm:w-20 bg-gradient-to-r from-[#fffaf7] to-transparent z-[5]" />
+            <div className="pointer-events-none absolute right-0 top-0 bottom-2 w-10 sm:w-20 bg-gradient-to-l from-[#fffaf7] to-transparent z-[5]" />
+
+            <button
+              onClick={() => scroll(shopScrollRef, "left")}
+              aria-label="Scroll shops left"
+              className="flex items-center justify-center absolute left-1 sm:left-3 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg shadow-orange-200/50 border border-orange-100 rounded-full w-8 h-8 sm:w-10 sm:h-10 text-gray-600 text-lg sm:text-xl font-bold transition hover:bg-[#ff4d2d] hover:text-white hover:scale-105 hover:border-transparent active:scale-95"
+            >
+              ‹
+            </button>
+
+            <div
+              ref={shopScrollRef}
+              onWheel={(e) => handleWheel(shopScrollRef, e)}
+              className="overflow-x-auto scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            >
+              <div className="flex gap-4 pb-3 px-6 w-max">
+                {shopInMyCity?.map((shop, index) => (
+                  <div
+                    key={index}
+                    className="rounded-2xl transition-all duration-200 hover:-translate-y-1.5 hover:shadow-lg hover:shadow-orange-200/60"
+                  >
+                    <CategoryCard name={shop.name} image={shop.image} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={() => scroll(shopScrollRef, "right")}
+              aria-label="Scroll shops right"
+              className="flex items-center justify-center absolute right-1 sm:right-3 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg shadow-orange-200/50 border border-orange-100 rounded-full w-8 h-8 sm:w-10 sm:h-10 text-gray-600 text-lg sm:text-xl font-bold transition hover:bg-[#ff4d2d] hover:text-white hover:scale-105 hover:border-transparent active:scale-95"
+            >
+              ›
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* ===== Suggested food items ===== */}
+      <div className="w-full max-w-6xl mx-auto flex flex-col gap-4 px-[10px] pt-12 pb-16">
+        <div className="flex items-center gap-3 px-1">
+          <span className="w-1.5 h-6 rounded-full bg-[#ff4d2d]" />
+          <h2 className="text-gray-900 text-xl sm:text-2xl font-bold tracking-tight">
+            Suggested Food Items
+          </h2>
+        </div>
+
+        {itemsInMyCity?.length === 0 ? (
+          <div className="w-full rounded-2xl border border-dashed border-orange-200 bg-orange-50/50 py-10 px-6 text-center">
+            <p className="text-gray-500 text-sm">
+              Nothing suggested yet — explore a shop to see popular dishes here.
+            </p>
+          </div>
+        ) : (
+          <div className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 justify-items-center">
+            {itemsInMyCity?.map((item, index) => (
+              <div
+                key={index}
+                className="rounded-2xl transition-all duration-200 hover:-translate-y-1.5 hover:shadow-lg hover:shadow-orange-200/60 w-full"
+              >
+                <FoodCard data={item} />
+              </div>
             ))}
           </div>
-          {showRightCateButton &&  <button className='absolute right-0 top-1/2 -translate-y-1/2 bg-[#ff4d2d] text-white p-2 rounded-full shadow-lg hover:bg-[#e64528] z-10' onClick={()=>scrollHandler(cateScrollRef,"right")}>
-<FaCircleChevronRight />
-          </button>}
-         
-        </div>
+        )}
       </div>
-
-      <div className='w-full max-w-6xl flex flex-col gap-5 items-start p-[10px]'>
- <h1 className='text-gray-800 text-2xl sm:text-3xl'>Best Shop in {currentCity}</h1>
- <div className='w-full relative'>
-          {showLeftShopButton &&  <button className='absolute left-0 top-1/2 -translate-y-1/2 bg-[#ff4d2d] text-white p-2 rounded-full shadow-lg hover:bg-[#e64528] z-10' onClick={()=>scrollHandler(shopScrollRef,"left")}><FaCircleChevronLeft />
-          </button>}
-         
-
-          <div className='w-full flex overflow-x-auto gap-4 pb-2 ' ref={shopScrollRef}>
-            {shopInMyCity?.map((shop, index) => (
-              <CategoryCard name={shop.name} image={shop.image} key={index} onClick={()=>navigate(`/shop/${shop._id}`)}/>
-            ))}
-          </div>
-          {showRightShopButton &&  <button className='absolute right-0 top-1/2 -translate-y-1/2 bg-[#ff4d2d] text-white p-2 rounded-full shadow-lg hover:bg-[#e64528] z-10' onClick={()=>scrollHandler(shopScrollRef,"right")}>
-<FaCircleChevronRight />
-          </button>}
-         
-        </div>
-      </div>
-
-      <div className='w-full max-w-6xl flex flex-col gap-5 items-start p-[10px]'>
-       <h1 className='text-gray-800 text-2xl sm:text-3xl'>
-        Suggested Food Items
-       </h1>
-
-<div className='w-full h-auto flex flex-wrap gap-[20px] justify-center'>
-{updatedItemsList?.map((item,index)=>(
-  <FoodCard key={index} data={item}/>
-))}
-</div>
-
-
-      </div>
-
-
     </div>
-  )
+  );
 }
 
-export default UserDashboard
+export default UserDashboard;
