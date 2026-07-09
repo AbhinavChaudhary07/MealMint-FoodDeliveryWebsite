@@ -1,13 +1,29 @@
 import axios from 'axios'
 import React, { useEffect, useMemo, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import { acceptDeliveryOrder } from '../redux/userSlice'
 import { serverUrl } from '../App'
 import { FiMapPin, FiNavigation, FiPackage, FiPhone, FiUser } from 'react-icons/fi'
+import DeliveryNav from './DeliveryNav'
 
 function DeliveryBoy() {
   const { userData, myOrders } = useSelector(state => state.user)
   const [locationStatus, setLocationStatus] = useState("Checking location...")
   const [isOnline, setIsOnline] = useState(true)
+  const [accepting, setAccepting] = useState({})
+  const dispatch = useDispatch()
+
+  const handleAccept = async (orderId, shopOrderId) => {
+    setAccepting(prev => ({ ...prev, [shopOrderId]: true }))
+    try {
+      await axios.post(`${serverUrl}/api/order/accept-delivery/${orderId}/${shopOrderId}`, {}, { withCredentials: true })
+      dispatch(acceptDeliveryOrder({ orderId, shopOrderId, userId: userData._id }))
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setAccepting(prev => ({ ...prev, [shopOrderId]: false }))
+    }
+  }
 
   const deliveryAssignments = useMemo(() => {
     return (myOrders || []).flatMap((order) => {
@@ -47,6 +63,7 @@ function DeliveryBoy() {
 
   return (
     <div className='min-h-screen bg-[#fafafa] pb-20'>
+      <DeliveryNav />
 
       {/* Sticky top strip: identity + online toggle */}
       <div className='sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-gray-100'>
@@ -75,7 +92,7 @@ function DeliveryBoy() {
         </div>
       </div>
 
-      <main className='w-full max-w-5xl mx-auto px-4 pt-6 flex flex-col gap-6'>
+      <main className='w-full max-w-5xl mx-auto px-4 pt-24 flex flex-col gap-6'>
 
         {/* Intro line */}
         <div>
@@ -143,6 +160,19 @@ function DeliveryBoy() {
                       <FiMapPin className='text-gray-400 text-[13px] shrink-0 mt-0.5' />
                       {order?.deliveryAddress?.text}
                     </p>
+
+                    {!shopOrder.assignedDeliveryBoy && (
+                      <button
+                        onClick={() => handleAccept(order._id, shopOrder._id)}
+                        disabled={accepting[shopOrder._id]}
+                        className='mt-3 w-full py-2 rounded-lg bg-[#ff4d2d] hover:bg-[#e63d1e] active:scale-95 text-white text-[13px] font-bold transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer'
+                      >
+                        {accepting[shopOrder._id] ? 'Accepting…' : 'Accept Delivery'}
+                      </button>
+                    )}
+                    {shopOrder.assignedDeliveryBoy && (
+                      <p className='mt-3 text-[12px] font-semibold text-green-600'>✓ You accepted this delivery</p>
+                    )}
 
                     <div className='flex flex-wrap items-center gap-x-5 gap-y-1 mt-3 pt-3 border-t border-gray-100 text-[12px] text-gray-500'>
                       <span><span className='text-gray-400'>Customer:</span> <span className='font-semibold text-gray-700'>{order?.user?.fullName || "Customer"}</span></span>

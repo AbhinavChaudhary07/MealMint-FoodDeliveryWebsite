@@ -33,20 +33,19 @@ const userSlice = createSlice({
       } else {
         state.cartItems.push(cartItem);
       }
-      state.totalAmount=state.cartItems.reduce((sum,i)=>sum+i.price*i.quantity,0)
+      state.totalAmount = state.cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
     },
-
     updateQuantity: (state, action) => {
       const { id, quantity } = action.payload;
       const item = state.cartItems.find((i) => i.id == id);
       if (item) {
         item.quantity = quantity;
       }
-       state.totalAmount=state.cartItems.reduce((sum,i)=>sum+i.price*i.quantity,0)
+      state.totalAmount = state.cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
     },
     removeCartItems: (state, action) => {
-      state.cartItems = state.cartItems.filter(i => i.id !== action.payload)
-      state.totalAmount = state.cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
+      state.cartItems = state.cartItems.filter(i => i.id !== action.payload);
+      state.totalAmount = state.cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
     },
     setTotalAmount: (state, action) => {
       state.totalAmount = action.payload;
@@ -73,17 +72,12 @@ const userSlice = createSlice({
           const id = shopOrder.shop?._id || shopOrder.shop;
           return id == shopId;
         });
-
-        if (shopOrder) {
-          shopOrder.status = status;
-        }
+        if (shopOrder) shopOrder.status = status;
         return;
       }
 
       const id = order.shopOrders?.shop?._id || order.shopOrders?.shop;
-      if (id == shopId) {
-        order.shopOrders.status = status;
-      }
+      if (id == shopId) order.shopOrders.status = status;
     },
     updateRealtimeOrderStatus: (state, action) => {
       const { orderId, shopId, status } = action.payload;
@@ -96,9 +90,14 @@ const userSlice = createSlice({
         return id == shopId;
       });
 
-      if (shopOrder) {
-        shopOrder.status = status;
-      }
+      if (shopOrder) shopOrder.status = status;
+    },
+    acceptDeliveryOrder: (state, action) => {
+      const { orderId, shopOrderId, userId } = action.payload;
+      const order = state.myOrders.find((o) => o._id === orderId);
+      if (!order) return;
+      const shopOrder = order.shopOrders.find((s) => s._id === shopOrderId);
+      if (shopOrder) shopOrder.assignedDeliveryBoy = { _id: userId };
     },
   },
 });
@@ -116,6 +115,7 @@ export const {
   addMyOrder,
   setSocket,
   updateOrderStatus,
-  updateRealtimeOrderStatus
+  updateRealtimeOrderStatus,
+  acceptDeliveryOrder
 } = userSlice.actions;
 export default userSlice.reducer;

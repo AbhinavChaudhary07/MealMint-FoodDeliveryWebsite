@@ -130,14 +130,45 @@ export const getOrderById = async (req, res) => {
             const ownerId = shopOrder.owner?._id || shopOrder.owner
             return ownerId?.toString() === req.userId
         })
+        const isDeliveryBoy = order.shopOrders.some((shopOrder) => {
+            const dbId = shopOrder.assignedDeliveryBoy?._id || shopOrder.assignedDeliveryBoy
+            return dbId?.toString() === req.userId
+        })
 
-        if (!isCustomer && !isOwner) {
+        if (!isCustomer && !isOwner && !isDeliveryBoy) {
             return res.status(403).json({ message: "Not allowed to view this order" })
         }
 
         return res.status(200).json(order)
     } catch (error) {
         return res.status(500).json({ message: `get order error: ${error.message}` })
+    }
+}
+
+export const acceptDelivery = async (req, res) => {
+    try {
+        const { orderId, shopOrderId } = req.params
+
+        const order = await Order.findById(orderId)
+        if (!order) return res.status(404).json({ message: "Order not found" })
+
+        const shopOrder = order.shopOrders.id(shopOrderId)
+        if (!shopOrder) return res.status(404).json({ message: "Shop order not found" })
+
+        if (shopOrder.status !== "out of delivery") {
+            return res.status(400).json({ message: "Order is not available for delivery" })
+        }
+        if (shopOrder.assignedDeliveryBoy) {
+            return res.status(400).json({ message: "Order already accepted by another delivery boy" })
+        }
+
+        shopOrder.assignedDeliveryBoy = req.userId
+        await order.save()
+
+        const populated = await order.populate(orderPopulate)
+        return res.status(200).json(populated)
+    } catch (error) {
+        return res.status(500).json({ message: `accept delivery error: ${error.message}` })
     }
 }
 
