@@ -1,6 +1,7 @@
 import Shop from "../models/shop.model.js"
 import Order from "../models/order.model.js"
 import User from "../models/user.model.js"
+import { sendDeliveryOptMail } from "../utils/mail.js"
 
 export const placeOrder = async (req, res) => {
     try {
@@ -197,7 +198,7 @@ export const updateOrderStatus = async (req, res) => {
         }
 
         if (shopOrder.owner?.toString() !== req.userId) {
-            return res.status(403).json({ message: "Not allowed to update this order" })
+            return res.status(403).json({ message: "Not allowed to update this order" }) 
         }
 
         shopOrder.status = status
@@ -212,3 +213,25 @@ export const updateOrderStatus = async (req, res) => {
         return res.status(500).json({ message: `update order status error: ${error.message}` })
     }
 }
+
+
+export const sendDeliveryOtp =async(req,res)=>{
+try {
+    const {orderId ,shopOrederId}=req.body
+    const order = await Order.findById(orderId).populate("user")
+    const shopOrder = order.shopOrders.id(shopOrderId)
+    if(!order && !shopOrder){
+        return res.status(400).json({message:"invalid order/shopOrderid"})
+    }
+    const opt =Math.floor(1000 + Math.random() * 9000).toString()
+    shopOrder.deliveryOtp=opt
+    shopOrder.otpExpires=Date.now() + 5*60*1000
+    await ordrer.save()
+    await sendDeliveryOptMail(order.user,otp)
+    return res.status(200).json({message: `Otp Sent Successfuly to${order.user?.fullName}`})
+} catch (error) {
+    return res.status(500).json({ message: `Otp error: ${error.message}` })
+}
+
+}
+

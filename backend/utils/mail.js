@@ -4,11 +4,11 @@ import nodemailer from "nodemailer"
 import dotenv from "dotenv"
 dotenv.config()
 
-// Create a transporter using SMTP
+
 const transporter = nodemailer.createTransport({
   service: "Gmail",
   port: 465,
-  secure: true, // use STARTTLS (upgrade connection to TLS after connecting)
+  secure: true, 
   auth: {
     user: process.env.EMAIL,
     pass: process.env.PASS,
@@ -21,6 +21,17 @@ await transporter.sendMail({
     to,
     subject:"Reset Your Password",
     html: `<p>Your OTP for password reset is <b>${otp}</b></p>`
+
+})
+}
+
+
+export const sendDeliveryOptMail =async(user,otp)=>{
+await transporter.sendMail({
+    from:process.env.EMAIL,
+    to:user.email,
+    subject:"Delivery OTP",
+    html: `<p>Your OTP for Delivery is <b>${otp}</b></p>`
 
 })
 }

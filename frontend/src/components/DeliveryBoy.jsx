@@ -5,6 +5,7 @@ import { acceptDeliveryOrder } from '../redux/userSlice'
 import { serverUrl } from '../App'
 import { FiMapPin, FiNavigation, FiPackage, FiPhone, FiUser } from 'react-icons/fi'
 import DeliveryNav from './DeliveryNav'
+import { useNavigate } from 'react-router-dom'
 
 function DeliveryBoy() {
   const { userData, myOrders } = useSelector(state => state.user)
@@ -12,6 +13,7 @@ function DeliveryBoy() {
   const [isOnline, setIsOnline] = useState(true)
   const [accepting, setAccepting] = useState({})
   const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   const handleAccept = async (orderId, shopOrderId) => {
     setAccepting(prev => ({ ...prev, [shopOrderId]: true }))
@@ -171,7 +173,16 @@ function DeliveryBoy() {
                       </button>
                     )}
                     {shopOrder.assignedDeliveryBoy && (
-                      <p className='mt-3 text-[12px] font-semibold text-green-600'>✓ You accepted this delivery</p>
+                      <div className='mt-3 flex items-center justify-between'>
+                        <p className='text-[12px] font-semibold text-green-600'>✓ You accepted this delivery</p>
+                        <button
+                          onClick={() => navigate(`/track-order/${order._id}`)}
+                          className='flex items-center gap-1.5 px-3 py-1.5 bg-[#ff4d2d] hover:bg-[#e63d1e] text-white text-[12px] font-bold rounded-lg transition-colors duration-150 cursor-pointer'
+                        >
+                          <FiNavigation className='text-[13px]' />
+                          Track Order
+                        </button>
+                      </div>
                     )}
 
                     <div className='flex flex-wrap items-center gap-x-5 gap-y-1 mt-3 pt-3 border-t border-gray-100 text-[12px] text-gray-500'>
