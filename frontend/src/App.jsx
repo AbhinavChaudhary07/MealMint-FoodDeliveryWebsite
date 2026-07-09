@@ -20,7 +20,7 @@ import MyOrders from './pages/MyOrders'
 import TrackOrderPage from './pages/TrackOrderPage'
 import EditItem from './pages/EditItem'
 import useGetMyOrders from './hooks/useGetMyOrders'
-export const serverUrl = "http://localhost:8000"
+export const serverUrl = "http://localhost:8000" 
 
 function App() {
   useGetCurrentUser()

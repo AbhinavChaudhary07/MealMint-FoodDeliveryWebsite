@@ -73,7 +73,17 @@ export const getMyOrders = async (req, res) => {
             return res.status(404).json({ message: "User not found" })
         }
 
-        const query = user.role === "owner" ? { "shopOrders.owner": req.userId } : { user: req.userId }
+        const query = user.role === "owner"
+            ? { "shopOrders.owner": req.userId }
+            : user.role === "deliveryBoy"
+                ? {
+                    "shopOrders.status": "out of delivery",
+                    $or: [
+                        { "shopOrders.assignedDeliveryBoy": req.userId },
+                        { "shopOrders.assignedDeliveryBoy": null }
+                    ]
+                }
+                : { user: req.userId }
         const orders = await Order.find(query).sort({ createdAt: -1 }).populate(orderPopulate)
 
         if (user.role === "owner") {
@@ -86,6 +96,20 @@ export const getMyOrders = async (req, res) => {
                 return orderObject
             })
             return res.status(200).json(ownerOrders)
+        }
+
+        if (user.role === "deliveryBoy") {
+            const deliveryOrders = orders.map((order) => {
+                const orderObject = order.toObject()
+                orderObject.shopOrders = orderObject.shopOrders.filter((shopOrder) => {
+                    const assignedDeliveryBoyId = shopOrder.assignedDeliveryBoy?._id || shopOrder.assignedDeliveryBoy
+                    return shopOrder.status === "out of delivery" &&
+                        (!assignedDeliveryBoyId || assignedDeliveryBoyId?.toString() === req.userId)
+                })
+                return orderObject
+            }).filter((order) => order.shopOrders.length > 0)
+
+            return res.status(200).json(deliveryOrders)
         }
 
         return res.status(200).json(orders)
@@ -157,4 +181,3 @@ export const updateOrderStatus = async (req, res) => {
         return res.status(500).json({ message: `update order status error: ${error.message}` })
     }
 }
-

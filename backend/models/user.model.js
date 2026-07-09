@@ -24,6 +24,25 @@ const userSchema =new mongoose.Schema({
         enum:["user","owner","deliveryBoy"],
         required : true
     },
+    isOnline:{
+        type:Boolean,
+        default:false
+    },
+    socketId:{
+        type:String,
+        default:null
+    },
+    location:{
+        type:{
+            type:String,
+            enum:["Point"],
+            default:"Point"
+        },
+        coordinates:{
+            type:[Number],
+            default:[0,0]
+        }
+    },
     resetOtp:{
         type:String
     },

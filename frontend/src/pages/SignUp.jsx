@@ -144,7 +144,7 @@ function SignUp() {
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
-              placeholder="Min. 8 characters"
+              placeholder="Min. 6 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-xl px-3.5 py-2.5 pr-10 text-sm text-gray-800 bg-gray-50 outline-none transition-colors"
