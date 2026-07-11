@@ -42,7 +42,11 @@ const shopOrderSchema = new mongoose.Schema(
     },
 
     otpExpires:{
-      type:Data,
+      type:Date,
+      default:null
+    },
+    deliveredAt:{
+      type:Date,
       default:null
     }
   },

@@ -57,7 +57,7 @@ function SignUp() {
       }, { withCredentials: true })
       dispatch(setUserData(data))
     } catch (error) {
-      console.log(error)
+      setErr(error?.response?.data?.message || "Google sign-up failed")
     }
   }
 
