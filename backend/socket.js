@@ -5,54 +5,43 @@ export const socketHandler = (io) => {
     console.log(socket.id)
     socket.on('identity', async ({ userId }) => {
       try {
-        const user = await User.findByIdAndUpdate(userId, {
-          socketId: socket.id, isOnline: true
-        }, { new: true })
+        await User.findByIdAndUpdate(userId, { socketId: socket.id, isOnline: true }, { new: true })
       } catch (error) {
         console.log(error)
       }
     })
-
 
     socket.on('updateLocation', async ({ latitude, longitude, userId }) => {
       try {
         const user = await User.findByIdAndUpdate(userId, {
-          location: {
-            type: 'Point',
-            coordinates: [longitude, latitude]
-          },
+          location: { type: 'Point', coordinates: [longitude, latitude] },
           isOnline: true,
           socketId: socket.id
         })
-
         if (user) {
-          io.emit('updateDeliveryLocation',{
-            deliveryBoyId:userId,
-            latitude,
-            longitude
-          })
+          io.emit('updateDeliveryLocation', { deliveryBoyId: userId, latitude, longitude })
         }
-
-
       } catch (error) {
-          console.log('updateDeliveryLocation error')
+        console.log('updateDeliveryLocation error')
       }
     })
 
+    // Chat: join a room per shopOrder
+    socket.on('joinChat', ({ roomId }) => {
+      socket.join(roomId)
+    })
 
-
+    // Chat: relay message to the room
+    socket.on('sendMessage', ({ roomId, message, senderId, senderName, timestamp }) => {
+      io.to(roomId).emit('receiveMessage', { message, senderId, senderName, timestamp })
+    })
 
     socket.on('disconnect', async () => {
       try {
-
-        await User.findOneAndUpdate({ socketId: socket.id }, {
-          socketId: null,
-          isOnline: false
-        })
+        await User.findOneAndUpdate({ socketId: socket.id }, { socketId: null, isOnline: false })
       } catch (error) {
         console.log(error)
       }
-
     })
   })
 }

@@ -34,7 +34,7 @@ function FoodCard({ data }) {
   };
 
   return (
-    <div className="group w-[270px] rounded-3xl bg-white border border-orange-100 shadow-md overflow-hidden hover:-translate-y-2 hover:shadow-2xl hover:shadow-orange-200/50 transition-all duration-300 flex flex-col">
+    <div className="group w-full rounded-3xl bg-white border border-orange-100 shadow-md overflow-hidden hover:-translate-y-2 hover:shadow-2xl hover:shadow-orange-200/50 transition-all duration-300 flex flex-col">
 
       <div className="relative w-full h-[190px] overflow-hidden bg-gradient-to-br from-orange-50 to-orange-100">
 

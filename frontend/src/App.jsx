@@ -18,6 +18,8 @@ import CheckOut from './pages/CheckOut'
 import OrderPlaced from './pages/OrderPlaced'
 import MyOrders from './pages/MyOrders'
 import TrackOrderPage from './pages/TrackOrderPage'
+import Shop from './pages/Shop'
+import Chat from './pages/Chat'
 import EditItem from './pages/EditItem'
 import useGetMyOrders from './hooks/useGetMyOrders'
 export const serverUrl = "http://localhost:8000" 
@@ -44,6 +46,8 @@ function App() {
       <Route path='/order-placed' element={userData ? <OrderPlaced/> : <Navigate to={"/signin"} />} />
       <Route path='/my-orders' element={userData ? <MyOrders/> : <Navigate to={"/signin"} />} />
       <Route path='/track-order/:orderId' element={userData ? <TrackOrderPage/> : <Navigate to={"/signin"} />} />
+      <Route path='/shop/:shopId' element={userData ? <Shop /> : <Navigate to={"/signin"} />} />
+      <Route path='/chat/:orderId/:shopOrderId' element={userData ? <Chat /> : <Navigate to={"/signin"} />} />
       <Route path='/edit-item/:itemId' element={userData ? <EditItem/> : <Navigate to={"/signin"} />} />
     </Routes>
   )

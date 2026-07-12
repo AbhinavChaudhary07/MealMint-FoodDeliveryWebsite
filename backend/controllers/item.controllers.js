@@ -82,6 +82,17 @@ export const deleteItem =async (req,res)=>{
   }
 }
 
+export const getItemsByShop = async (req, res) => {
+  try {
+    const shop = await Shop.findById(req.params.shopId)
+    if (!shop) return res.status(404).json({ message: "Shop not found" })
+    const items = await Item.find({ shop: req.params.shopId })
+    return res.status(200).json({ shop, items })
+  } catch (error) {
+    return res.status(500).json({ message: `Get items by shop error ${error}` })
+  }
+}
+
 export const getItemByCity = async(req,res) =>{
       try {
         const {city} =req.params

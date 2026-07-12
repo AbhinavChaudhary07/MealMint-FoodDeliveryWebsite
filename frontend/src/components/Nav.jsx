@@ -7,7 +7,7 @@ import { serverUrl } from '../App'
 import { setCity, setUserData } from '../redux/userSlice'
 import { useNavigate } from 'react-router-dom'
 
-function Nav() {
+function Nav({ search = "", setSearch = () => {} }) {
   const { userData, city, cartItems } = useSelector(state => state.user)
   const [showInfo, setShowInfo] = useState(false)
   const dispatch = useDispatch()
@@ -56,13 +56,15 @@ function Nav() {
                 <input
                   type='text'
                   placeholder='Search restaurants or dishes…'
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
                   className='flex-1 text-[13px] sm:text-[14px] bg-transparent outline-none placeholder-gray-400 min-w-0 text-gray-800'
                 />
               </div>
 
               {/* Search button */}
-              <button className='bg-[#ff4d2d] hover:bg-[#e63d1e] active:bg-[#d43a1c] transition-colors duration-150 h-full w-[44px] flex items-center justify-center shrink-0 cursor-pointer'>
-                <FiSearch className='text-white text-[16px]' />
+              <button onClick={() => setSearch("")} className='bg-[#ff4d2d] hover:bg-[#e63d1e] active:bg-[#d43a1c] transition-colors duration-150 h-full w-[44px] flex items-center justify-center shrink-0 cursor-pointer'>
+                {search ? <span className='text-white text-[18px] font-bold leading-none'>×</span> : <FiSearch className='text-white text-[16px]' />}
               </button>
             </div>
           ) : (

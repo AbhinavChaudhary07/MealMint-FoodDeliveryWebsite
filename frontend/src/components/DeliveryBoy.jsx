@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { acceptDeliveryOrder, markShopOrderDelivered } from '../redux/userSlice'
 import { serverUrl } from '../App'
-import { FiMapPin, FiNavigation, FiPackage, FiPhone, FiUser } from 'react-icons/fi'
+import { FiMapPin, FiNavigation, FiPackage, FiPhone, FiUser, FiMessageCircle } from 'react-icons/fi'
 import DeliveryNav from './DeliveryNav'
 import { useNavigate } from 'react-router-dom'
 
@@ -208,13 +208,22 @@ function DeliveryBoy() {
                       <div className='mt-3 flex flex-col gap-2'>
                         <div className='flex items-center justify-between'>
                           <p className='text-[12px] font-semibold text-green-600'>✓ You accepted this delivery</p>
-                          <button
-                            onClick={() => navigate(`/track-order/${order._id}`)}
-                            className='flex items-center gap-1.5 px-3 py-1.5 bg-[#ff4d2d] hover:bg-[#e63d1e] text-white text-[12px] font-bold rounded-lg transition-colors duration-150 cursor-pointer'
-                          >
-                            <FiNavigation className='text-[13px]' />
-                            Track Order
-                          </button>
+                          <div className='flex items-center gap-2'>
+                            <button
+                              onClick={() => navigate(`/chat/${order._id}/${shopOrder._id}`)}
+                              className='flex items-center gap-1.5 px-3 py-1.5 border border-[#ff4d2d] text-[#ff4d2d] hover:bg-orange-50 text-[12px] font-bold rounded-lg transition-colors duration-150 cursor-pointer'
+                            >
+                              <FiMessageCircle className='text-[13px]' />
+                              Chat
+                            </button>
+                            <button
+                              onClick={() => navigate(`/track-order/${order._id}`)}
+                              className='flex items-center gap-1.5 px-3 py-1.5 bg-[#ff4d2d] hover:bg-[#e63d1e] text-white text-[12px] font-bold rounded-lg transition-colors duration-150 cursor-pointer'
+                            >
+                              <FiNavigation className='text-[13px]' />
+                              Track Order
+                            </button>
+                          </div>
                         </div>
                         {shopOrder.status === "out of delivery" && shopOrder.assignedDeliveryBoy?._id === userData._id && (
                           <>

@@ -5,6 +5,7 @@ import { serverUrl } from '../App'
 import { IoIosArrowRoundBack } from 'react-icons/io'
 import DeliveryBoyTracking from '../components/DeliveryBoyTracking'
 import { useSelector } from 'react-redux'
+import { FiMessageCircle } from 'react-icons/fi'
 
 function TrackOrderPage() {
   const { orderId } = useParams()
@@ -56,6 +57,13 @@ function TrackOrderPage() {
               <div className='text-sm text-gray-700 space-y-1'>
                 <p className='font-semibold'>Delivery Boy: {shopOrder.assignedDeliveryBoy.fullName}</p>
                 <p className='font-semibold'>Contact: {shopOrder.assignedDeliveryBoy.mobile}</p>
+                <button
+                  onClick={() => navigate(`/chat/${currentOrder._id}/${shopOrder._id}`)}
+                  className='flex items-center gap-2 mt-2 px-4 py-2 bg-[#ff4d2d] hover:bg-[#e63d1e] text-white text-sm font-semibold rounded-xl transition-colors'
+                >
+                  <FiMessageCircle size={15} />
+                  Chat with Delivery Boy
+                </button>
               </div>
             ) : (
               <p className='font-semibold text-gray-500'>Delivery boy not assigned yet.</p>

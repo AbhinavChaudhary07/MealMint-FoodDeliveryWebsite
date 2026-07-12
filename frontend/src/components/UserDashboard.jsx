@@ -1,17 +1,29 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import Nav from "./Nav";
 import { categories } from "../category";
 import CategoryCard from "./CategoryCard";
 import { useSelector } from "react-redux";
 import useGetShopByCity from "../hooks/useGetShopByCity";
 import FoodCard from "./FoodCard";
+import { useNavigate } from "react-router-dom";
 
 function UserDashboard() {
   useGetShopByCity();
   const { city, shopInMyCity, itemsInMyCity } = useSelector((state) => state.user);
+  const [search, setSearch] = useState("");
+
+  const navigate = useNavigate()
 
   const catScrollRef = useRef(null);
   const shopScrollRef = useRef(null);
+
+  const filteredItems = search.trim()
+    ? itemsInMyCity?.filter(item => item.name?.toLowerCase().includes(search.toLowerCase()))
+    : itemsInMyCity
+
+  const filteredShops = search.trim()
+    ? shopInMyCity?.filter(shop => shop.name?.toLowerCase().includes(search.toLowerCase()))
+    : shopInMyCity
 
   const scroll = (ref, direction) => {
     if (ref.current) {
@@ -34,7 +46,7 @@ function UserDashboard() {
 
   return (
     <div className="min-h-screen bg-[#fffaf7]">
-      <Nav />
+      <Nav search={search} setSearch={setSearch} />
 
       {/* ===== Hero banner ===== */}
       <div className="relative overflow-hidden bg-gradient-to-br from-[#2a1210] via-[#3d1712] to-[#ff4d2d] rounded-b-[30px] shadow-xl">
@@ -196,11 +208,11 @@ function UserDashboard() {
         <div className="flex items-center gap-3 px-1">
           <span className="w-1.5 h-6 rounded-full bg-[#ff4d2d]" />
           <h2 className="text-gray-900 text-xl sm:text-2xl font-bold tracking-tight">
-            Best Shops In <span className="text-[#ff4d2d]">{city}</span>
+            {search.trim() ? `Results for "${search}"` : <>Best Shops In <span className="text-[#ff4d2d]">{city}</span></>}
           </h2>
         </div>
 
-        {shopInMyCity?.length === 0 ? (
+        {filteredShops?.length === 0 ? (
           <div className="w-full rounded-2xl border border-dashed border-orange-200 bg-orange-50/50 py-10 px-6 text-center">
             <p className="text-gray-500 text-sm">
               No shops found near {city} yet. Check back soon!
@@ -225,10 +237,11 @@ function UserDashboard() {
               className="overflow-x-auto scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
             >
               <div className="flex gap-4 pb-3 px-6 w-max">
-                {shopInMyCity?.map((shop, index) => (
+                {filteredShops?.map((shop, index) => (
                   <div
                     key={index}
-                    className="rounded-2xl transition-all duration-200 hover:-translate-y-1.5 hover:shadow-lg hover:shadow-orange-200/60"
+                    onClick={() => navigate(`/shop/${shop._id}`)}
+                    className="rounded-2xl transition-all duration-200 hover:-translate-y-1.5 hover:shadow-lg hover:shadow-orange-200/60 cursor-pointer"
                   >
                     <CategoryCard name={shop.name} image={shop.image} />
                   </div>
@@ -256,7 +269,7 @@ function UserDashboard() {
           </h2>
         </div>
 
-        {itemsInMyCity?.length === 0 ? (
+        {filteredItems?.length === 0 ? (
           <div className="w-full rounded-2xl border border-dashed border-orange-200 bg-orange-50/50 py-10 px-6 text-center">
             <p className="text-gray-500 text-sm">
               Nothing suggested yet — explore a shop to see popular dishes here.
@@ -264,7 +277,7 @@ function UserDashboard() {
           </div>
         ) : (
           <div className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 justify-items-center">
-            {itemsInMyCity?.map((item, index) => (
+            {filteredItems?.map((item, index) => (
               <div
                 key={index}
                 className="rounded-2xl transition-all duration-200 hover:-translate-y-1.5 hover:shadow-lg hover:shadow-orange-200/60 w-full"

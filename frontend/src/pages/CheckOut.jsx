@@ -102,13 +102,21 @@ function CheckOut() {
 
 const openRazorpayWindow=(orderId,razorOrder)=>{
 
-  const options={
- key:import.meta.env.VITE_RAZORPAY_KEY_ID,
- amount:razorOrder.amount,
- currency:'INR',
- name:"Vingo",
- description:"Food Delivery Website",
- order_id:razorOrder.id,
+  const options = {
+    key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+    amount: razorOrder.amount,
+    currency: 'INR',
+    name: "MealMint",
+    description: "Food Delivery",
+    order_id: razorOrder.id,
+    prefill: {
+      name: userData?.fullName || "",
+      email: userData?.email || "",
+      contact: userData?.mobile || "",
+      method: "upi",
+      vpa: "success@razorpay"
+    },
+    theme: { color: "#ff4d2d" },
  handler:async function (response) {
   try {
     const result=await axios.post(`${serverUrl}/api/order/verify-payment`,{
