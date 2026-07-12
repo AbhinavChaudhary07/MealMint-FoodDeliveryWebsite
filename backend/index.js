@@ -15,7 +15,7 @@ const app =express()
 
 const port = process.env.PORT || 5000
 app.use(cors({
-    origin:"http://localhost:5173",
+    origin:"https://mealmint-fooddelivery.onrender.com",
     credentials:true
 }))
 app.use(express.json())
