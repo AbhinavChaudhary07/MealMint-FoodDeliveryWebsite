@@ -99,6 +99,13 @@ const userSlice = createSlice({
       const shopOrder = order.shopOrders.find((s) => s._id === shopOrderId);
       if (shopOrder) shopOrder.assignedDeliveryBoy = { _id: userId };
     },
+    markShopOrderDelivered: (state, action) => {
+      const { orderId, shopOrderId } = action.payload;
+      const order = state.myOrders.find((o) => o._id === orderId);
+      if (!order) return;
+      const shopOrder = order.shopOrders.find((s) => s._id === shopOrderId);
+      if (shopOrder) shopOrder.status = "delivered";
+    },
   },
 });
 
@@ -116,6 +123,7 @@ export const {
   setSocket,
   updateOrderStatus,
   updateRealtimeOrderStatus,
-  acceptDeliveryOrder
+  acceptDeliveryOrder,
+  markShopOrderDelivered
 } = userSlice.actions;
 export default userSlice.reducer;

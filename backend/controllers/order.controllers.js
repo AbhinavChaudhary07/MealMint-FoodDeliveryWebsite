@@ -254,6 +254,6 @@ export const verifyDeliveryOtp = async (req, res) => {
     })
     return res.status(200).json({message:"Order Delivered Successfully"})
     } catch (error) {
-         return res.status(500).json({message:"Verify Delivery Otp"}) 
+         return res.status(500).json({message:"Verify Delivery Otp"})
     }
  }

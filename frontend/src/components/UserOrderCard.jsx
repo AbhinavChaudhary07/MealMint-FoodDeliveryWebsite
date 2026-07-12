@@ -115,6 +115,12 @@ function UserOrderCard({ data }) {
               {shopOrder.status || "pending"}
             </span>
           </div>
+          {shopOrder.status === "out of delivery" && shopOrder.deliveryOtp && (
+            <div className="mt-2 bg-orange-50 border border-orange-200 rounded-lg p-3 text-center">
+              <p className="text-xs text-gray-500 mb-1">Share this OTP with the delivery boy</p>
+              <p className="text-2xl font-bold tracking-widest text-[#ff4d2d]">{shopOrder.deliveryOtp}</p>
+            </div>
+          )}
         </div>
       ))}
 

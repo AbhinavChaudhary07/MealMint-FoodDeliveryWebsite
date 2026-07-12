@@ -1,7 +1,7 @@
 import axios from 'axios'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { acceptDeliveryOrder } from '../redux/userSlice'
+import { acceptDeliveryOrder, markShopOrderDelivered } from '../redux/userSlice'
 import { serverUrl } from '../App'
 import { FiMapPin, FiNavigation, FiPackage, FiPhone, FiUser } from 'react-icons/fi'
 import DeliveryNav from './DeliveryNav'
@@ -12,6 +12,11 @@ function DeliveryBoy() {
   const [locationStatus, setLocationStatus] = useState("Checking location...")
   const [isOnline, setIsOnline] = useState(true)
   const [accepting, setAccepting] = useState({})
+  const [sendingOtp, setSendingOtp] = useState({})
+  const [otpSent, setOtpSent] = useState({})
+  const [otpInput, setOtpInput] = useState({})
+  const [verifyingOtp, setVerifyingOtp] = useState({})
+  const [otpError, setOtpError] = useState({})
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
@@ -24,6 +29,33 @@ function DeliveryBoy() {
       console.log(error)
     } finally {
       setAccepting(prev => ({ ...prev, [shopOrderId]: false }))
+    }
+  }
+
+  const handleSendOtp = async (orderId, shopOrderId) => {
+    setSendingOtp(prev => ({ ...prev, [shopOrderId]: true }))
+    try {
+      await axios.post(`${serverUrl}/api/order/send-delivery-otp`, { orderId, shopOrderId }, { withCredentials: true })
+      setOtpSent(prev => ({ ...prev, [shopOrderId]: true }))
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setSendingOtp(prev => ({ ...prev, [shopOrderId]: false }))
+    }
+  }
+
+  const handleVerifyOtp = async (orderId, shopOrderId) => {
+    const otp = otpInput[shopOrderId]
+    if (!otp || otp.length !== 4) return setOtpError(prev => ({ ...prev, [shopOrderId]: "Enter 4-digit OTP" }))
+    setVerifyingOtp(prev => ({ ...prev, [shopOrderId]: true }))
+    setOtpError(prev => ({ ...prev, [shopOrderId]: "" }))
+    try {
+      await axios.post(`${serverUrl}/api/order/verify-delivery-otp`, { orderId, shopOrderId, otp }, { withCredentials: true })
+      dispatch(markShopOrderDelivered({ orderId, shopOrderId }))
+    } catch (error) {
+      setOtpError(prev => ({ ...prev, [shopOrderId]: error?.response?.data?.message || "Invalid OTP" }))
+    } finally {
+      setVerifyingOtp(prev => ({ ...prev, [shopOrderId]: false }))
     }
   }
 
@@ -173,15 +205,52 @@ function DeliveryBoy() {
                       </button>
                     )}
                     {shopOrder.assignedDeliveryBoy && (
-                      <div className='mt-3 flex items-center justify-between'>
-                        <p className='text-[12px] font-semibold text-green-600'>✓ You accepted this delivery</p>
-                        <button
-                          onClick={() => navigate(`/track-order/${order._id}`)}
-                          className='flex items-center gap-1.5 px-3 py-1.5 bg-[#ff4d2d] hover:bg-[#e63d1e] text-white text-[12px] font-bold rounded-lg transition-colors duration-150 cursor-pointer'
-                        >
-                          <FiNavigation className='text-[13px]' />
-                          Track Order
-                        </button>
+                      <div className='mt-3 flex flex-col gap-2'>
+                        <div className='flex items-center justify-between'>
+                          <p className='text-[12px] font-semibold text-green-600'>✓ You accepted this delivery</p>
+                          <button
+                            onClick={() => navigate(`/track-order/${order._id}`)}
+                            className='flex items-center gap-1.5 px-3 py-1.5 bg-[#ff4d2d] hover:bg-[#e63d1e] text-white text-[12px] font-bold rounded-lg transition-colors duration-150 cursor-pointer'
+                          >
+                            <FiNavigation className='text-[13px]' />
+                            Track Order
+                          </button>
+                        </div>
+                        {shopOrder.status === "out of delivery" && shopOrder.assignedDeliveryBoy?._id === userData._id && (
+                          <>
+                            <button
+                              onClick={() => handleSendOtp(order._id, shopOrder._id)}
+                              disabled={sendingOtp[shopOrder._id]}
+                              className='w-full py-2 rounded-lg border-2 border-[#ff4d2d] text-[#ff4d2d] hover:bg-orange-50 text-[13px] font-bold transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer'
+                            >
+                              {sendingOtp[shopOrder._id] ? 'Sending OTP…' : otpSent[shopOrder._id] ? '✓ OTP Sent to Customer' : 'Send Delivery OTP'}
+                            </button>
+                            {otpSent[shopOrder._id] && (
+                              <div className='flex flex-col gap-1'>
+                                <div className='flex gap-2'>
+                                  <input
+                                    type='number'
+                                    maxLength={4}
+                                    placeholder='Enter 4-digit OTP'
+                                    value={otpInput[shopOrder._id] || ""}
+                                    onChange={e => setOtpInput(prev => ({ ...prev, [shopOrder._id]: e.target.value }))}
+                                    className='flex-1 border border-gray-300 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-[#ff4d2d]'
+                                  />
+                                  <button
+                                    onClick={() => handleVerifyOtp(order._id, shopOrder._id)}
+                                    disabled={verifyingOtp[shopOrder._id]}
+                                    className='px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-[13px] font-bold rounded-lg disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer'
+                                  >
+                                    {verifyingOtp[shopOrder._id] ? 'Verifying…' : 'Verify'}
+                                  </button>
+                                </div>
+                                {otpError[shopOrder._id] && (
+                                  <p className='text-red-500 text-[12px]'>{otpError[shopOrder._id]}</p>
+                                )}
+                              </div>
+                            )}
+                          </>
+                        )}
                       </div>
                     )}
 
