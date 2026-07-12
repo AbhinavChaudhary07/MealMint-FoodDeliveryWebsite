@@ -22,7 +22,7 @@ import Shop from './pages/Shop'
 import Chat from './pages/Chat'
 import EditItem from './pages/EditItem'
 import useGetMyOrders from './hooks/useGetMyOrders'
-export const serverUrl = "http://localhost:8000" 
+export const serverUrl = "https://mealmint-02zb.onrender.com" 
 
 function App() {
   useGetCurrentUser()
